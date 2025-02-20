@@ -1,0 +1,647 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI for Accessibility</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=text_to_speech" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=speech_to_text" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background: url('/static/pawel-czerwinski-ihr_tI1KLKU-unsplash.jpg');
+            background-size: cover;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            /* color: white; */
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(143, 141, 195, 0.247);
+            /* Adjust opacity for darkness */
+            z-index: -1;
+            /* Ensure it stays behind content */
+        }
+
+        .center-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        #lang {
+            background: rgba(255, 255, 255, 0.1);
+            /* Light transparent background */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Soft border */
+            border-radius: 8px;
+            /* Rounded corners */
+            padding: 8px 12px;
+            font-size: 16px;
+            color: aliceblue;
+            /* Text color */
+            backdrop-filter: blur(10px);
+            /* Glassmorphism effect */
+            -webkit-backdrop-filter: blur(10px);
+            /* Safari support */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Soft shadow */
+            transition: all 0.3s ease-in-out;
+            /* Smooth transition */
+            outline: none;
+            /* Remove default outline */
+            cursor: pointer;
+            /* Make it clear it's clickable */
+        }
+
+        /* Style dropdown options */
+        #lang option {
+            background: rgba(0, 0, 0, 0.6);
+            /* Darker background for contrast */
+            color: white;
+        }
+
+        #status {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 5.5rem;
+            /* Adjust font size */
+            font-weight: bold;
+            background: linear-gradient(to right, #70dbf8, #88f7ee);
+            /* Gradient from left to right */
+            -webkit-background-clip: text;
+            /* Clip background to text */
+            -webkit-text-fill-color: transparent;
+            /* Make text fill transparent */
+            display: inline-block;
+            /* Ensures the gradient applies properly */
+        }
+
+        .content-section {
+            display: none;
+            padding: 20px;
+            background: rgba(4, 4, 4, 0.1);
+            /* Lighter transparent background */
+            border-radius: 10px;
+            color: aliceblue;
+            backdrop-filter: blur(10px);
+            /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(10px);
+            /* Safari support */
+            border: 1px solid rgba(14, 14, 14, 0.2);
+            /* Subtle border */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Soft shadow */
+            transition: all 0.3s ease-in-out;
+            /* Smooth transition */
+        }
+
+        .active-section {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="text-center">
+            <h1 class="mb-3">Live AI Processing</h1>
+            <div class="d-flex justify-content-center gap-4">
+
+                <div class="text-center">
+                    <button class="btn btn-primary rounded p-3" onclick="showSection('detection1')">
+
+                        <i class="bi bi-person-bounding-box fs-6"></i>
+                    </button>
+                    <small class="d-block mt-2"
+                        style="font-weight: bold; color: rgb(56, 56, 56);font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Object
+                        Detection</small>
+                </div>
+
+                <div class="text-center">
+                    <button class="btn btn-primary rounded p-3" onclick="showSection('detection')">
+                        <i class="bi bi-hand-index-thumb-fill"></i>
+                    </button>
+                    <small class="d-block mt-2"
+                        style="font-weight: bold; color: rgb(56, 56, 56);font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Gesture
+                        Control</small>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-success rounded p-3" onclick="showSection('speech')">
+                        <span class="material-symbols-outlined">
+                            speech_to_text
+                        </span>
+
+                    </button>
+                    <small class="d-block mt-2"
+                        style="font-weight: bold; color: rgb(56, 56, 56);font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Speech
+                        to Text</small>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary rounded p-3" onclick="showSection('TexttoSpeech')">
+                        <i class="bi bi-type"></i>
+                    </button>
+                    <small class="d-block mt-2"
+                        style="font-weight: bold; color: rgb(56, 56, 56);font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Text
+                        to Speech</small>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div id="detection1" class="content-section">
+            <h2>Live Object Detection</h2>
+            <button id="startBtn" class="btn btn-primary">Start Detection</button>
+            <button id="stopBtn" class="btn btn-danger">Stop Detection</button>
+            <img id="videoFeed" src="" class="img-fluid mt-3" width="640" height="480" alt="Object will apear here...">
+            <p id="statusMessage"></p>
+            <h3 class="mt-3">Detections:</h3>
+            <div id="detections" class="p-3 bg-light text-dark rounded"></div>
+        </div>
+        <div id="speech" class="content-section">
+            <h2>Speech-to-Text</h2>
+            <button id="start-speech" class="btn btn-info">Start Speech-to-Text</button>
+            <button id="stop-speech" class="btn btn-danger">Stop Speech-to-Text</button>
+            <div id="transcription-box" class="mt-3 p-3 bg-light text-dark rounded">Waiting for transcription...</div>
+        </div>
+        <div id="TexttoSpeech" class="content-section">
+            <h2>Text-to-Speech</h2>
+            <label for="lang">Select Language:</label>
+            <select id="lang">
+                {% for code, lang in languages.items() %}
+                <option value="{{ code }}">{{ lang }}</option>
+                {% endfor %}
+            </select>
+
+            <br><br>
+
+            <textarea id="text" rows="3" cols="50" placeholder="Enter text here..."></textarea>
+            <br><br>
+            <button onclick="startTTS()"><i class="bi bi-play-circle-fill"></i></button>
+            <audio id="audioPlayer" controls style="display:none;"></audio>
+        </div>
+        <div id="detection" class="content-section">
+            <h2>Hand Gesture Control</h2>
+            <button id="start" class="btn btn-primary">Start Gesture Control</button>
+            <button id="stop" class="btn btn-danger">Stop Gesture Control</button>
+            <p id="status">Status: Not Started</p>
+        </div>
+    </div>
+
+    <script>
+        let isDetecting = false;
+        let isListening = false;
+        let istracking = false;
+        let isTyping = false;
+        var socket = io.connect("http://localhost:5000");
+
+        function startTTS() {
+            let text = document.getElementById("text").value;
+            let lang = document.getElementById("lang").value;
+
+            if (!text.trim()) {
+                alert("Please enter text!");
+                return;
+            }
+
+            // Send text to backend via SocketIO
+            socket.emit("tts_request", { text: text, lang: lang, use_online: true });
+
+            // Handle response
+            socket.on("tts_response", function (data) {
+                if (data.audio) {
+                    let audioBlob = new Blob([data.audio], { type: "audio/wav" });
+                    let audioURL = URL.createObjectURL(audioBlob);
+                    let audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = audioURL;
+                    audioPlayer.style.display = "block";
+                    audioPlayer.play();
+                }
+            });
+
+            socket.on("tts_error", function (data) {
+                alert("Error: " + data.error);
+            });
+        }
+
+        // Object Detection Start & Stop
+        document.getElementById("startBtn").addEventListener("click", function () {
+            if (!isDetecting) {
+                socket.emit('start_detection');
+                document.getElementById("videoFeed").src = "/video_feed"; // Corrected URL
+                isDetecting = true;
+            }
+        });
+
+
+        document.getElementById("stopBtn").addEventListener("click", function () {
+            socket.emit('stop_detection');
+            document.getElementById("videoFeed").src = "";
+            isDetecting = false;
+        });
+
+
+        document.getElementById("start-speech").addEventListener("click", function () {
+            if (!isListening) {
+                socket.emit("start_speech_to_text");
+                document.getElementById("transcription-box").innerText = "Listening...";
+                isListening = true;
+            }
+        });
+
+        document.getElementById("stop-speech").addEventListener("click", function () {
+            socket.emit("stop_speech_to_text");
+            document.getElementById("transcription-box").innerText = "Transcription stopped.";
+            isListening = false;
+        });
+
+        socket.on("transcription", function (data) {
+            document.getElementById("transcription-box").innerHTML = data.message;
+        });
+
+        socket.on("detection", function (data) {
+            document.getElementById("detections").innerHTML = `<p>${data.message}</p>`;
+        });
+
+        socket.on("status", function (data) {
+            document.getElementById("statusMessage").innerText = data.message;
+        });
+        socket.on("tracking_status", function (data) {
+            document.getElementById("status").innerText = "Status: " + data.status;
+        });
+        function showSection(sectionId) {
+            document.querySelectorAll(".content-section").forEach(sec => sec.classList.remove("active-section"));
+            document.getElementById(sectionId).classList.add("active-section");
+        }
+        document.getElementById("start").addEventListener("click", function () {
+            if (!istracking) {
+                socket.emit("start_tracking"); // Corrected event name
+                istracking = true;
+            }
+        });
+
+        document.getElementById("stop").addEventListener("click", function () {
+            socket.emit("stop_tracking");
+            istracking = false;
+        });
+    </script>
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI for Accessibility</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=text_to_speech" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=speech_to_text" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            /* background: url('/static/pawel-czerwinski-ihr_tI1KLKU-unsplash.jpg'); */
+            background: #BDDDFC;
+            background-size: cover;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+        }
+        /* Add this new style for the title bar */
+    .title-bar {
+        width: 100%;
+        height: 40px; /* Adjust the height as needed */
+        background: #6A89A7; /* Default background color */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Optional border */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: aliceblue;
+    }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* background: rgba(143, 141, 195, 0.247); */
+            z-index: -1;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 20px;
+            width: 200px;
+            /* background: rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.2); */
+        }
+
+        .button-container button {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .content-container {
+            flex: 1;
+            padding: 20px;
+            padding-top: 0;
+            /* Remove top padding to align with buttons */
+        }
+
+        .content-section {
+            display: none;
+            padding: 20px;
+            background: rgba(4, 4, 4, 0.1);
+            border-radius: 10px;
+            color: aliceblue;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(14, 14, 14, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .active-section {
+            display: block;
+        }
+
+        #heading_font {
+            font-size: 5.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg,#88f7c7, #b270f8, #88f7ee);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+             animation: gradientAnimation 5s ease infinite; */
+        }
+        h1 {
+            color: rgb(255, 255, 255);
+            font-size: 5.5rem;
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            /* -webkit-text-fill-color: transparent; */
+            display: inline-block;
+            /* animation: gradientAnimation 5s ease infinite; */
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        #lang {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 16px;
+            color: aliceblue;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #lang option {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="title-bar">
+        Phoniex
+    </div>
+    <div class="main-container">
+        <!-- Header with centered heading -->
+        <div class="header">
+            <h1>AI <h1 id="heading_font"> Processing</h1></h1>
+        </div>
+
+        <!-- Content wrapper for buttons and content sections -->
+        <div class="content-wrapper">
+            <!-- Buttons on the left -->
+            <div class="button-container">
+                <button class="btn btn-primary rounded p-3" onclick="showSection('detection1')">
+                    <i class="bi bi-person-bounding-box fs-6"></i>
+                    <small class="d-block mt-2">Object Detection</small>
+                </button>
+                <button class="btn btn-primary rounded p-3" onclick="showSection('detection')">
+                    <i class="bi bi-hand-index-thumb-fill"></i>
+                    <small class="d-block mt-2">Gesture Control</small>
+                </button>
+                <button class="btn btn-success rounded p-3" onclick="showSection('speech')">
+                    <span class="material-symbols-outlined">speech_to_text</span>
+                    <small class="d-block mt-2">Speech to Text</small>
+                </button>
+                <button class="btn btn-primary rounded p-3" onclick="showSection('TexttoSpeech')">
+                    <i class="bi bi-type"></i>
+                    <small class="d-block mt-2">Text to Speech</small>
+                </button>
+            </div>
+
+            <!-- Content sections on the right -->
+            <div class="content-container">
+                <div id="detection1" class="content-section">
+                    <h2>Live Object Detection</h2>
+                    <button id="startBtn" class="btn btn-primary">Start Detection</button>
+                    <button id="stopBtn" class="btn btn-danger">Stop Detection</button>
+                    <img id="videoFeed" src="" class="img-fluid mt-3" width="640" height="480"
+                        alt="Object will appear here...">
+                    <p id="statusMessage"></p>
+                    <h3 class="mt-3">Detections:</h3>
+                    <div id="detections" class="p-3 bg-light text-dark rounded"></div>
+                </div>
+                <div id="speech" class="content-section">
+                    <h2>Speech-to-Text</h2>
+                    <button id="start-speech" class="btn btn-info">Start Speech-to-Text</button>
+                    <button id="stop-speech" class="btn btn-danger">Stop Speech-to-Text</button>
+                    <div id="transcription-box" class="mt-3 p-3 bg-light text-dark rounded">Waiting for transcription...
+                    </div>
+                </div>
+                <div id="TexttoSpeech" class="content-section">
+                    <h2>Text-to-Speech</h2>
+                    <label for="lang">Select Language:</label>
+                    <select id="lang">
+                        {% for code, lang in languages.items() %}
+                        <option value="{{ code }}">{{ lang }}</option>
+                        {% endfor %}
+                    </select>
+                    <br><br>
+                    <textarea id="text" rows="3" cols="50" placeholder="Enter text here..."></textarea>
+                    <br><br>
+                    <button onclick="startTTS()"><i class="bi bi-play-circle-fill"></i></button>
+                    <audio id="audioPlayer" controls style="display:none;"></audio>
+                </div>
+                <div id="detection" class="content-section">
+                    <h2>Hand Gesture Control</h2>
+                    <button id="start" class="btn btn-primary">Start Gesture Control</button>
+                    <button id="stop" class="btn btn-danger">Stop Gesture Control</button>
+                    <p id="status">Status: Not Started</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let isDetecting = false;
+        let isListening = false;
+        let istracking = false;
+        let isTyping = false;
+        var socket = io.connect("http://localhost:5000");
+
+        function startTTS() {
+            let text = document.getElementById("text").value;
+            let lang = document.getElementById("lang").value;
+
+            if (!text.trim()) {
+                alert("Please enter text!");
+                return;
+            }
+
+            socket.emit("tts_request", { text: text, lang: lang, use_online: true });
+
+            socket.on("tts_response", function (data) {
+                if (data.audio) {
+                    let audioBlob = new Blob([data.audio], { type: "audio/wav" });
+                    let audioURL = URL.createObjectURL(audioBlob);
+                    let audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = audioURL;
+                    audioPlayer.style.display = "block";
+                    audioPlayer.play();
+                }
+            });
+
+            socket.on("tts_error", function (data) {
+                alert("Error: " + data.error);
+            });
+        }
+
+        document.getElementById("startBtn").addEventListener("click", function () {
+            if (!isDetecting) {
+                socket.emit('start_detection');
+                document.getElementById("videoFeed").src = "/video_feed";
+                isDetecting = true;
+            }
+        });
+
+        document.getElementById("stopBtn").addEventListener("click", function () {
+            socket.emit('stop_detection');
+            document.getElementById("videoFeed").src = "";
+            isDetecting = false;
+        });
+
+        document.getElementById("start-speech").addEventListener("click", function () {
+            if (!isListening) {
+                socket.emit("start_speech_to_text");
+                document.getElementById("transcription-box").innerText = "Listening...";
+                isListening = true;
+            }
+        });
+
+        document.getElementById("stop-speech").addEventListener("click", function () {
+            socket.emit("stop_speech_to_text");
+            document.getElementById("transcription-box").innerText = "Transcription stopped.";
+            isListening = false;
+        });
+
+        socket.on("transcription", function (data) {
+            document.getElementById("transcription-box").innerHTML = data.message;
+        });
+
+        socket.on("detection", function (data) {
+            document.getElementById("detections").innerHTML = `<p>${data.message}</p>`;
+        });
+
+        socket.on("status", function (data) {
+            document.getElementById("statusMessage").innerText = data.message;
+        });
+
+        socket.on("tracking_status", function (data) {
+            document.getElementById("status").innerText = "Status: " + data.status;
+        });
+
+        function showSection(sectionId) {
+            document.querySelectorAll(".content-section").forEach(sec => sec.classList.remove("active-section"));
+            document.getElementById(sectionId).classList.add("active-section");
+        }
+
+        document.getElementById("start").addEventListener("click", function () {
+            if (!istracking) {
+                socket.emit("start_tracking");
+                istracking = true;
+            }
+        });
+
+        document.getElementById("stop").addEventListener("click", function () {
+            socket.emit("stop_tracking");
+            istracking = false;
+        });
+    </script>
+</body>
+
+</html>
